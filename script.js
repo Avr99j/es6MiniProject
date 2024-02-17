@@ -1,35 +1,46 @@
 const fs = require('fs');
+const { get } = require('https');
 const inquirer = require('inquirer');
 
-inquirer.prompt([
+async function getUserInput() {
+    try {
 
-    {
-        type: 'input',
-        name: "name",
-        message: "Enter your Name",
-    },
-    {
-        type: "input",
-        name: "location",
-        message: 'Enter your location'
-    },
-    {
-        type: "input",
-        name: "bio",
-        message: "Enter your bio",
-    },
-    {
-        type: "input",
-        name: "Linkedin",
-        message: "Enter your LinkedIn URL",
-    },
-    {
-        type: "input",
-        name: "GitHub",
-        message: "Enter your GitHub URL",
+        const answers = await inquirer.prompt([
+
+            {
+                type: 'input',
+                name: "name",
+                message: "Enter your Name",
+            },
+            {
+                type: "input",
+                name: "location",
+                message: 'Enter your location'
+            },
+            {
+                type: "input",
+                name: "bio",
+                message: "Enter your bio",
+            },
+            {
+                type: "input",
+                name: "Linkedin",
+                message: "Enter your LinkedIn URL",
+            },
+            {
+                type: "input",
+                name: "GitHub",
+                message: "Enter your GitHub URL",
+            }
+        ]);
+        return answers;
+    } catch (error) {
+        throw new Error('Error occured while getting user input: ', error);
     }
-])
-    .then((answers) => {
+}
+
+async function generateHTML(answers) {
+    try {
         const htmlContent = `
         <!DOCTYPE html>
 <html lang="en">
@@ -85,13 +96,30 @@ inquirer.prompt([
 
 </html>
         `;
-        fs.writeFile('index.html', htmlContent, (err) => {
-            if (err) throw err;
-            console.log("HTML file has been saved!");
-        });
+        return htmlContent;
+    } catch (error) {
+        throw new Error('Error occured while generating html: ', error);
+    }
+}
 
-    })
-    .catch((error) => {
+async function writeToFile(htmlContent) {
+    try {
+        await fs.promises.writeFile('index.html', htmlContent);
+        console.log('HTML file has been saved successully!')
+
+    } catch (error) {
         console.log('Error occured: ', error);
-    })
+    }
+}
 
+async function main() {
+    try {
+        const userInput = await getUserInput();
+        const htmlContent = await generateHTML(userInput);
+        const result = await writeToFile(htmlContent);
+    } catch (error) {
+        console.error(error.message);
+    }
+}
+
+main();
